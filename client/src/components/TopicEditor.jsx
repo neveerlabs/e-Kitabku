@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { X, Plus, Trash2, Eye, Bold, AlertTriangle, Tag, List, ExternalLink, Code, HelpCircle, Image } from 'lucide-react'
+import { X, Plus, Trash2, Eye, Bold, Highlighter, AlertTriangle, Tag, List, ExternalLink, Code, HelpCircle, Image } from 'lucide-react'
 import KitabPreview from './KitabPreview'
 import RedirectPreview from './RedirectPreview'
 
@@ -384,7 +384,11 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
                     className="px-2 py-1 bg-yellow-100 border rounded text-xs flex items-center gap-1 flex-shrink-0">
                     <Tag className="w-3 h-3" /> Kitab
                   </button>
-                  <button onClick={() => insertText('**', '**')} title="Bold highlight"
+                  <button onClick={() => insertText('**', '**')} title="Highlight teks (seperti seleksi)"
+                    className="px-2 py-1 bg-yellow-100 border rounded text-xs flex items-center gap-1 flex-shrink-0">
+                    <Highlighter className="w-3 h-3" /> Select
+                  </button>
+                  <button onClick={() => insertText('<b>', '</b>')} title="Tebalkan teks (HTML bold)"
                     className="px-2 py-1 bg-yellow-100 border rounded text-xs flex items-center gap-1 flex-shrink-0">
                     <Bold className="w-3 h-3" /> Bold
                   </button>
@@ -470,7 +474,8 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
                           newTags[idx].kitab = e.target.value
                           setForm(prev => ({ ...prev, tags: newTags }))
                         }}
-                        rows={2} className="w-full border px-2 py-1 rounded text-sm font-mono"
+                        rows={6}
+                        className="w-full border px-2 py-1 rounded text-sm font-mono min-h-[120px]"
                       />
                     </div>
                   ))}
@@ -756,7 +761,6 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
         </div>
       </div>
 
-      {/* Modal Preview */}
       {showPreviewModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[70] p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
@@ -796,7 +800,6 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
         </div>
       )}
 
-      {/* Modal Redirect */}
       {showRedirectModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[70] p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
