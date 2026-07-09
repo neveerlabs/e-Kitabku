@@ -395,15 +395,15 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
                     className="px-2 py-1 bg-yellow-100 border rounded text-xs flex items-center gap-1 flex-shrink-0">
                     <Tag className="w-3 h-3" /> Kitab
                   </button>
-                  <button onClick={() => insertText('**', '**')} title="Highlight teks (seperti seleksi)"
+                  <button onClick={() => insertText('**', '**')} title="Highlight text (Select Text)"
                     className="px-2 py-1 bg-yellow-100 border rounded text-xs flex items-center gap-1 flex-shrink-0">
                     <Highlighter className="w-3 h-3" /> Select
                   </button>
-                  <button onClick={() => insertText('<b>', '</b>')} title="Tebalkan teks (HTML bold)"
+                  <button onClick={() => insertText('<b>', '</b>')} title="HTML bold"
                     className="px-2 py-1 bg-yellow-100 border rounded text-xs flex items-center gap-1 flex-shrink-0">
                     <Bold className="w-3 h-3" /> Bold
                   </button>
-                  <button onClick={() => insertText('!!', '!!')} title="Catatan penting"
+                  <button onClick={() => insertText('!!', '!!')} title="Dictionary"
                     className="px-2 py-1 bg-yellow-100 border rounded text-xs flex items-center gap-1 flex-shrink-0">
                     <AlertTriangle className="w-3 h-3" /> Note
                   </button>
