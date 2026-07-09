@@ -283,7 +283,6 @@ function App() {
           topic={data[editingTopic.babKey].topics[editingTopic.topicIndex]}
           onSave={(updatedTopic) => {
             updateTopic(editingTopic.babKey, editingTopic.topicIndex, updatedTopic)
-            setEditingTopic(null)
           }}
           onClose={() => setEditingTopic(null)}
         />
