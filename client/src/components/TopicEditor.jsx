@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { X, Plus, Trash2, Eye, Bold, Highlighter, AlertTriangle, Tag, List, ExternalLink, Code, HelpCircle, Image } from 'lucide-react'
+import { X, Plus, Trash2, Eye, Bold, Italic, Highlighter, AlertTriangle, Tag, List, ExternalLink, Code, HelpCircle, Image, AlignJustify } from 'lucide-react'
 import KitabPreview from './KitabPreview'
 import RedirectPreview from './RedirectPreview'
 
@@ -402,6 +402,14 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
                   <button onClick={() => insertText('<b>', '</b>')} title="HTML bold"
                     className="px-2 py-1 bg-yellow-100 border rounded text-xs flex items-center gap-1 flex-shrink-0">
                     <Bold className="w-3 h-3" /> Bold
+                  </button>
+                  <button onClick={() => insertText('<i>', '</i>')} title="HTML italic (miring)"
+                    className="px-2 py-1 bg-yellow-100 border rounded text-xs flex items-center gap-1 flex-shrink-0">
+                    <Italic className="w-3 h-3" /> Italic
+                  </button>
+                  <button onClick={() => insertText('&emsp;', '')} title="Sisipkan spasi paragraf (indentasi)"
+                    className="px-2 py-1 bg-yellow-100 border rounded text-xs flex items-center gap-1 flex-shrink-0">
+                    <AlignJustify className="w-3 h-3" /> Paragraf
                   </button>
                   <button onClick={() => insertText('!!', '!!')} title="Dictionary"
                     className="px-2 py-1 bg-yellow-100 border rounded text-xs flex items-center gap-1 flex-shrink-0">
