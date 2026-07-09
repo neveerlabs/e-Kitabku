@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { X, Plus, Trash2, Eye, Bold, Highlighter, AlertTriangle, Tag, List, ExternalLink, Code, HelpCircle, Image } from 'lucide-react'
 import KitabPreview from './KitabPreview'
 import RedirectPreview from './RedirectPreview'
@@ -21,6 +21,10 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
   const [onModalConfirm, setOnModalConfirm] = useState(null)
   const previewRef = useRef(null)
   const modalInputRef = useRef(null)
+
+  const handleSave = useCallback(() => {
+    onSave({ ...topic, ...form })
+  }, [onSave, topic, form])
 
   const syncTags = () => {
     const regex = /\(\(([^)]+)\)\)/g
@@ -156,10 +160,6 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
     } else if (e.key === 'Escape') {
       handleModalCancel()
     }
-  }
-
-  const handleSave = () => {
-    onSave({ ...topic, ...form })
   }
 
   const renderPreview = () => {
@@ -333,6 +333,17 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
     initPreviews()
     initQuizBlocks()
   }, [form.content, form.previews, form.tags])
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault()
+        handleSave()
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [handleSave])
 
   const addFileToPreview = (previewIndex) => {
     const newPreviews = [...form.previews]
@@ -541,7 +552,7 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
           </div>
 
           <div className="w-full lg:w-1/2 border-l p-4 overflow-y-auto bg-gray-50" ref={previewRef}>
-            <h4 className="font-medium flex items-center gap-1 mb-2"><Eye className="w-4 h-4" /> Preview (Mobile)</h4>
+            <h4 className="font-medium flex items-center gap-1 mb-2"><Eye className="w-4 h-4" /><i> Mobile preview</i></h4>
             <div className="bg-white border rounded p-4 shadow-inner max-w-full"
               dangerouslySetInnerHTML={{ __html: renderPreview() }}
             />
