@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import axios from 'axios'
-import { Search, File } from 'lucide-react'
+import { Search, File, X } from 'lucide-react'
 import Sidebar from './components/Sidebar'
 import TopicList from './components/TopicList'
 import TopicEditor from './components/TopicEditor'
@@ -19,8 +19,11 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState([])
   const [showSearchResults, setShowSearchResults] = useState(false)
+  const [showFloatingSearch, setShowFloatingSearch] = useState(false)
   const searchRef = useRef(null)
   const searchInputRef = useRef(null)
+  const floatingSearchRef = useRef(null)
+  const floatingInputRef = useRef(null)
 
   const showToast = useCallback((message, type = 'info') => {
     setToast({ message, type });
@@ -166,6 +169,7 @@ function App() {
   const handleResultClick = (result) => {
     setShowSearchResults(false)
     setSearchQuery('')
+    setShowFloatingSearch(false)
     if (result.type === 'bab') {
       setActiveBab(result.key)
     } else if (result.type === 'artikel') {
@@ -176,10 +180,19 @@ function App() {
     }
   }
 
+  const closeFloatingSearch = () => {
+    setShowFloatingSearch(false)
+    setSearchQuery('')
+    setShowSearchResults(false)
+  }
+
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (searchRef.current && !searchRef.current.contains(e.target)) {
         setShowSearchResults(false)
+      }
+      if (floatingSearchRef.current && !floatingSearchRef.current.contains(e.target)) {
+        closeFloatingSearch()
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -190,14 +203,22 @@ function App() {
     const handleKeyDown = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault()
-        if (searchInputRef.current) {
+        if (editingTopic) {
+          setShowFloatingSearch(true)
+          setSearchQuery('')
+          setShowSearchResults(false)
+          setTimeout(() => floatingInputRef.current?.focus(), 50)
+        } else if (searchInputRef.current) {
           searchInputRef.current.focus()
         }
+      }
+      if (e.key === 'Escape' && showFloatingSearch) {
+        closeFloatingSearch()
       }
     }
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [])
+  }, [editingTopic, showFloatingSearch])
 
   if (!path) {
     return <PathInput onSetPath={handleSetPath} error={error} />
@@ -312,6 +333,67 @@ function App() {
           type={toast.type}
           onClose={() => setToast(null)}
         />
+      )}
+
+      {showFloatingSearch && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-start justify-center z-[100] pt-16 px-4">
+          <div
+            ref={floatingSearchRef}
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-gray-100/20"
+          >
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
+              <Search className="w-5 h-5 text-gray-400 flex-shrink-0" />
+              <input
+                ref={floatingInputRef}
+                type="text"
+                placeholder="Searching..."
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="flex-1 outline-none bg-transparent text-base text-gray-800 placeholder-gray-400"
+                autoFocus
+              />
+              <button
+                onClick={closeFloatingSearch}
+                className="text-gray-400 hover:text-gray-600 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            {showSearchResults && (
+              <div className="max-h-60 overflow-y-auto custom-scrollbar">
+                {searchResults.length > 0 ? (
+                  searchResults.map((result, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() => handleResultClick(result)}
+                      className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 cursor-pointer border-b last:border-0 transition"
+                    >
+                      <span className="text-sm text-gray-800">{result.title}</span>
+                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+                        result.type === 'bab' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
+                      }`}>
+                        {result.type === 'bab' ? 'Bab' : 'Artikel'}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="px-4 py-6 text-center text-sm text-gray-500">
+                    Tidak ada hasil untuk "{searchQuery}"
+                  </div>
+                )}
+              </div>
+            )}
+            {!searchQuery && (
+              <div className="px-4 py-6 text-center text-sm text-gray-400">
+                Masukkan input pencarian dengan kata kunci...
+              </div>
+            )}
+            <div className="px-4 py-2 bg-gray-50/80 text-xs text-gray-400 flex justify-between items-center border-t border-gray-100">
+              <span>Tekan <kbd className="px-1.5 py-0.5 bg-gray-200 rounded text-gray-600 text-[10px] font-mono">Ctrl+K</kbd> untuk membuka Search bar</span>
+              <span><kbd className="px-1.5 py-0.5 bg-gray-200 rounded text-gray-600 text-[10px] font-mono">Esc</kbd> untuk menutup</span>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
