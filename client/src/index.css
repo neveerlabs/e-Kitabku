@@ -35,43 +35,6 @@
   display: none;
 }
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 8px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #c4c4c4;
-  border-radius: 8px;
-  transition: background 0.2s;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
-}
-
-.custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: #c4c4c4 #f1f1f1;
-}
-
-.hide-scrollbar {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.hide-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-
 * {
   scrollbar-width: thin;
   scrollbar-color: #c4c4c4 #f1f1f1;
@@ -95,4 +58,15 @@
 
 *::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
+}
+
+.search-input-wrapper .shortcut-indicator {
+  display: none;
+}
+.search-input-wrapper input:not(:focus):placeholder-shown ~ .shortcut-indicator {
+  display: block;
+}
+.search-input-wrapper input:focus ~ .shortcut-indicator,
+.search-input-wrapper input:not(:placeholder-shown) ~ .shortcut-indicator {
+  display: none;
 }
