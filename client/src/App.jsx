@@ -20,6 +20,7 @@ function App() {
   const [searchResults, setSearchResults] = useState([])
   const [showSearchResults, setShowSearchResults] = useState(false)
   const searchRef = useRef(null)
+  const searchInputRef = useRef(null)
 
   const showToast = useCallback((message, type = 'info') => {
     setToast({ message, type });
@@ -185,6 +186,19 @@ function App() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault()
+        if (searchInputRef.current) {
+          searchInputRef.current.focus()
+        }
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
   if (!path) {
     return <PathInput onSetPath={handleSetPath} error={error} />
   }
@@ -208,11 +222,12 @@ function App() {
             {data && activeBab ? data[activeBab]?.title : 'Pilih Bab'}
           </h2>
           <div className="flex items-center gap-3">
-            <div className="relative" ref={searchRef}>
-              <div className="flex items-center border border-gray-300 rounded-md px-3 py-1 bg-white focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
+            <div className="relative search-input-wrapper" ref={searchRef}>
+              <div className="flex items-center border border-gray-300 rounded-md px-3 py-1 bg-white focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 relative">
                 <input
+                  ref={searchInputRef}
                   type="text"
-                  placeholder="Mencari..."
+                  placeholder="Search..."
                   value={searchQuery}
                   onChange={(e) => handleSearch(e.target.value)}
                   onFocus={() => {
@@ -220,8 +235,11 @@ function App() {
                       setShowSearchResults(true)
                     }
                   }}
-                  className="outline-none bg-transparent text-sm w-48 md:w-64"
+                  className="outline-none bg-transparent text-sm w-48 md:w-64 pr-6"
                 />
+                <span className="shortcut-indicator text-xs text-gray-400 pointer-events-none absolute right-8">
+                  Ctrl+K
+                </span>
                 <Search className="w-4 h-4 text-gray-400 flex-shrink-0 ml-2" />
               </div>
               {showSearchResults && searchResults.length > 0 && (
