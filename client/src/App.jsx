@@ -283,7 +283,7 @@ function App() {
               )}
               {showSearchResults && searchResults.length === 0 && searchQuery.trim() && (
                 <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg p-3 text-center text-sm text-gray-500 z-50">
-                  Tidak ada hasil
+                  No data available
                 </div>
               )}
             </div>
@@ -378,19 +378,19 @@ function App() {
                   ))
                 ) : (
                   <div className="px-4 py-6 text-center text-sm text-gray-500">
-                    Tidak ada hasil untuk "{searchQuery}"
+                    We couldn't find anything for "{searchQuery}"
                   </div>
                 )}
               </div>
             )}
             {!searchQuery && (
               <div className="px-4 py-6 text-center text-sm text-gray-400">
-                Masukkan input pencarian dengan kata kunci...
+                Enter keywords to search...
               </div>
             )}
             <div className="px-4 py-2 bg-gray-50/80 text-xs text-gray-400 flex justify-between items-center border-t border-gray-100">
-              <span>Tekan <kbd className="px-1.5 py-0.5 bg-gray-200 rounded text-gray-600 text-[10px] font-mono">Ctrl+K</kbd> untuk membuka Search bar</span>
-              <span><kbd className="px-1.5 py-0.5 bg-gray-200 rounded text-gray-600 text-[10px] font-mono">Esc</kbd> untuk menutup</span>
+              <span>Press <kbd className="px-1.5 py-0.5 bg-gray-200 rounded text-gray-600 text-[10px] font-mono">Ctrl+K</kbd> to open the search bar.</span>
+              <span>Press <kbd className="px-1.5 py-0.5 bg-gray-200 rounded text-gray-600 text-[10px] font-mono">Esc</kbd> to close</span>
             </div>
           </div>
         </div>
