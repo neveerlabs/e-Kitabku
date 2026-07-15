@@ -1,13 +1,51 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Plus, Trash2, Edit3, BookOpen, GripVertical, Github, X } from 'lucide-react'
+import axios from 'axios'
 
 export default function Sidebar({ data, activeBab, onSelect, onAddBab, onDeleteBab, onRenameBab, onReorderBab }) {
   const [showAdd, setShowAdd] = useState(false)
   const [newKey, setNewKey] = useState('')
   const [newTitle, setNewTitle] = useState('')
   const [deleteTarget, setDeleteTarget] = useState(null)
+  const [hoverCard, setHoverCard] = useState(false)
+  const [hoverTimeout, setHoverTimeout] = useState(null)
+  const [githubData, setGithubData] = useState(null)
+  const [loading, setLoading] = useState(false)
   const dragItem = useRef(null)
   const dragOverItem = useRef(null)
+  const cardRef = useRef(null)
+  const triggerRef = useRef(null)
+
+  useEffect(() => {
+    const fetchGithubData = async () => {
+      if (githubData) return
+      setLoading(true)
+      try {
+        const res = await axios.get('https://api.github.com/users/neveerlabs')
+        setGithubData({
+          avatar: res.data.avatar_url,
+          name: res.data.name || 'neveerlabs',
+          bio: res.data.bio || 'Developer & Content Creator',
+          repos: res.data.public_repos || 0,
+          followers: res.data.followers || 0,
+          following: res.data.following || 0
+        })
+      } catch (err) {
+        console.error('[GitHub] Failed to fetch user data:', err)
+        setGithubData({
+          avatar: 'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png',
+          name: 'neveerlabs',
+          bio: 'GitHub Profile',
+          repos: 0,
+          followers: 0,
+          following: 0
+        })
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchGithubData()
+  }, [])
 
   const handleAdd = () => {
     if (newKey && newTitle) {
@@ -60,6 +98,23 @@ export default function Sidebar({ data, activeBab, onSelect, onAddBab, onDeleteB
 
   const handleDeleteCancel = () => {
     setDeleteTarget(null)
+  }
+
+  const handleMouseEnter = () => {
+    const timeout = setTimeout(() => {
+      setHoverCard(true)
+    }, 400)
+    setHoverTimeout(timeout)
+  }
+
+  const handleMouseLeave = () => {
+    if (hoverTimeout) {
+      clearTimeout(hoverTimeout)
+      setHoverTimeout(null)
+    }
+    setTimeout(() => {
+      setHoverCard(false)
+    }, 200)
   }
 
   return (
@@ -135,26 +190,98 @@ export default function Sidebar({ data, activeBab, onSelect, onAddBab, onDeleteB
         ))}
       </nav>
 
-      <div className="flex-shrink-0 border-t border-gray-200 bg-gray-50/80 backdrop-blur-sm p-2">
-        <a
-          href="https://github.com/neveerlabs/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2.5 px-3 py-2 w-full h-full bg-white/80 hover:bg-white border border-gray-200/60 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 group"
+      <div className="flex-shrink-0 border-t border-gray-200 bg-gray-50/80 backdrop-blur-sm p-2 relative">
+        <div
+          ref={triggerRef}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          className="relative"
         >
-          <Github className="w-5 h-5 text-gray-700 group-hover:text-gray-900 transition" />
-          <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900 transition">
-            neveerlabs
-          </span>
-          <span className="ml-auto text-gray-400 group-hover:text-gray-600 transition">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
-          </span>
-        </a>
+          <a
+            href="https://github.com/neveerlabs/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2.5 px-3 py-2 w-full h-full bg-white/80 hover:bg-white border border-gray-200/60 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 group"
+          >
+            <Github className="w-5 h-5 text-gray-700 group-hover:text-gray-900 transition" />
+            <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900 transition">
+              neveerlabs
+            </span>
+          </a>
+
+          {hoverCard && githubData && !loading && (
+            <div
+              ref={cardRef}
+              className="absolute bottom-full left-0 mb-2 w-72 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-[100] animate-fade-in-up"
+            >
+              <a
+                href="https://github.com/neveerlabs/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block"
+              >
+                <div className="p-4">
+                  {/* Header: Avatar + Nama */}
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={githubData.avatar}
+                      alt="neveerlabs"
+                      className="w-12 h-12 rounded-full border-2 border-gray-200 flex-shrink-0 object-cover"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-sm font-semibold text-gray-800 truncate">
+                        M. Syalman Al Farizi
+                      </h4>
+                      <p className="text-xs text-gray-500 truncate">
+                        @neveerlabs
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Bio */}
+                  <p className="text-sm text-gray-600 mt-2 leading-relaxed">
+                    Developer & Content Creator
+                  </p>
+
+                  {/* Stats */}
+                  <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
+                    <span className="flex items-center gap-1">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                      </svg>
+                      {githubData.repos} repositori
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                      {githubData.followers} pengikut
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                      </svg>
+                      {githubData.following} menci
+                    </span>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="mt-3 pt-3 border-t border-gray-100">
+                    <div className="text-xs text-blue-600 font-medium flex items-center gap-1">
+                      <Github className="w-3 h-3" />
+                      github.com/neveerlabs
+                      <svg className="w-3 h-3 ml-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Modal Konfirmasi Hapus Bab */}
       {deleteTarget !== null && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[70] p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
