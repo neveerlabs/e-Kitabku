@@ -369,8 +369,8 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-between items-center p-4 border-b">
           <h3 className="text-lg font-bold">Edit Artikel: {topic.title}</h3>
           <button onClick={onClose}><X className="w-5 h-5" /></button>
