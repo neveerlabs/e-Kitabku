@@ -84,8 +84,8 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
   }
 
   const insertRedirectButton = () => {
-    setModalTitle('Sisipkan Redirect')
-    setModalPlaceholder('Masukkan nama redirect (contoh: definisi1)')
+    setModalTitle('Insert Redirect')
+    setModalPlaceholder('Enter redirect name (e.g., definition1)')
     setModalInput('')
     setOnModalConfirm(() => (name) => {
       if (name && name.trim()) {
@@ -98,8 +98,8 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
   }
 
   const insertDefineBlock = () => {
-    setModalTitle('Buat Definisi Redirect')
-    setModalPlaceholder('Masukkan nama unik (contoh: definisi1)')
+    setModalTitle('Create Redirect Definition')
+    setModalPlaceholder('Enter a unique name (e.g., definition1)')
     setModalInput('')
     setOnModalConfirm(() => (name) => {
       if (name && name.trim()) {
@@ -116,8 +116,8 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
     if (!textarea) return
     const start = textarea.selectionStart
     const end = textarea.selectionEnd
-    const selectedText = form.content.substring(start, end) || 'Pertanyaan'
-    const replacement = `<quiz>${selectedText}</quiz>\n<answer>Jawaban</answer>`
+    const selectedText = form.content.substring(start, end) || 'Quiztionary'
+    const replacement = `<quiz>${selectedText}</quiz>\n<answer>Answer</answer>`
     const newContent = form.content.substring(0, start) + replacement + form.content.substring(end)
     setForm(prev => ({ ...prev, content: newContent }))
     setTimeout(() => {
@@ -127,8 +127,8 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
   }
 
   const insertPreviewTag = () => {
-    setModalTitle('Sisipkan Preview')
-    setModalPlaceholder('Masukkan nama preview (contoh: gambar1)')
+    setModalTitle('Insert Preview')
+    setModalPlaceholder('Enter preview name (e.g., image1)')
     setModalInput('')
     setOnModalConfirm(() => (name) => {
       if (name && name.trim()) {
@@ -183,7 +183,7 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
       return `<div class="quiz-block">
         <div class="quiz-question">
           <span class="quiz-question-text">${question}</span>
-          <button class="quiz-show-more">Lihat selengkapnya</button>
+          <button class="quiz-show-more">Show more</button>
         </div>
         <div class="quiz-answer">${answer}</div>
       </div>`
@@ -191,7 +191,7 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
 
     html = html.replace(/<preview>([^<]+)<\/preview>/g, (match, name) => {
       const preview = form.previews.find(p => p.name === name.trim())
-      if (!preview || preview.files.length === 0) return '<div class="catatan-text">Preview tidak tersedia</div>'
+      if (!preview || preview.files.length === 0) return '<div class="catatan-text">Preview not available</div>'
       const filesHtml = preview.files.map((f, i) => {
         if (f.type === 'video') return `<video src="/img/preview/${f.src}" controls class="preview-media ${i===0?'active':''}" data-index="${i}"></video>`
         return `<img src="/img/preview/${f.src}" class="preview-media ${i===0?'active':''}" data-index="${i}" alt="preview">`
@@ -226,12 +226,12 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
     window.previewKitab = (tag) => {
       const found = form.tags.find(t => t.tag === tag)
       if (found) {
-        setKitabPreview({ header: found.header || 'Tanpa Judul', kitab: found.kitab || '' })
+        setKitabPreview({ header: found.header || 'Untitled', kitab: found.kitab || '' })
       }
     }
     window.previewRedirect = (name) => {
       const defs = window.__redirectDefs || {}
-      const content = defs[name] || '<p>Tidak ada konten untuk nama ini.</p>'
+      const content = defs[name] || '<p>No content available for this name.</p>'
       setRedirectPreview(content)
     }
     return () => {
@@ -406,7 +406,7 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100">
-          <h3 className="text-lg font-bold text-gray-800">Edit Artikel: <span className="font-normal text-gray-600">{topic.title}</span></h3>
+          <h3 className="text-lg font-bold text-gray-800"><span className="font-normal text-gray-600">{topic.title}</span></h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition p-1 rounded-lg hover:bg-gray-100">
             <X className="w-5 h-5" />
           </button>
@@ -420,14 +420,14 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Judul</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
                 <input value={form.title} onChange={e => setForm({...form, title: e.target.value})}
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Konten (HTML + Markup Khusus)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Content (HTML + Custom Markup)</label>
                 <div className="flex gap-1 mb-2 overflow-x-auto whitespace-nowrap py-1">
-                  <button onClick={() => insertText('((', '))')} title="Sisipkan kitab tag"
+                  <button onClick={() => insertText('((', '))')} title="Insert kitab tag"
                     className="px-2 py-1 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded text-xs flex items-center gap-1 flex-shrink-0 transition">
                     <Tag className="w-3 h-3" /> Kitab
                   </button>
@@ -439,35 +439,35 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
                     className="px-2 py-1 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded text-xs flex items-center gap-1 flex-shrink-0 transition">
                     <Bold className="w-3 h-3" /> Bold
                   </button>
-                  <button onClick={() => insertText('<i>', '</i>')} title="HTML italic (miring)"
+                  <button onClick={() => insertText('<i>', '</i>')} title="HTML italic"
                     className="px-2 py-1 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded text-xs flex items-center gap-1 flex-shrink-0 transition">
                     <Italic className="w-3 h-3" /> Italic
                   </button>
-                  <button onClick={() => insertText('&emsp;', '')} title="Sisipkan spasi paragraf (indentasi)"
+                  <button onClick={() => insertText('&emsp;', '')} title="Insert paragraph spacing"
                     className="px-2 py-1 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded text-xs flex items-center gap-1 flex-shrink-0 transition">
-                    <AlignJustify className="w-3 h-3" /> Paragraf
+                    <AlignJustify className="w-3 h-3" /> Paragraph
                   </button>
                   <button onClick={() => insertText('!!', '!!')} title="Dictionary"
                     className="px-2 py-1 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded text-xs flex items-center gap-1 flex-shrink-0 transition">
                     <AlertTriangle className="w-3 h-3" /> Note
                   </button>
-                  <button onClick={insertList} title="Masukkan daftar"
+                  <button onClick={insertList} title="Insert list"
                     className="px-2 py-1 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded text-xs flex items-center gap-1 flex-shrink-0 transition">
                     <List className="w-3 h-3" /> List
                   </button>
-                  <button onClick={insertRedirectButton} title="Sisipkan tombol redirect"
+                  <button onClick={insertRedirectButton} title="Insert redirect button"
                     className="px-2 py-1 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded text-xs flex items-center gap-1 flex-shrink-0 transition">
                     <ExternalLink className="w-3 h-3" /> Redirect
                   </button>
-                  <button onClick={insertDefineBlock} title="Sisipkan blok definisi redirect"
+                  <button onClick={insertDefineBlock} title="Insert redirect definition block"
                     className="px-2 py-1 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded text-xs flex items-center gap-1 flex-shrink-0 transition">
                     <Code className="w-3 h-3" /> Define
                   </button>
-                  <button onClick={insertQuizBlock} title="Sisipkan Quiz"
+                  <button onClick={insertQuizBlock} title="Insert Quiz"
                     className="px-2 py-1 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded text-xs flex items-center gap-1 flex-shrink-0 transition">
                     <HelpCircle className="w-3 h-3" /> Quiz
                   </button>
-                  <button onClick={insertPreviewTag} title="Sisipkan preview gambar/video"
+                  <button onClick={insertPreviewTag} title="Insert preview (image/video)"
                     className="px-2 py-1 bg-pink-50 hover:bg-pink-100 border border-pink-200 rounded text-xs flex items-center gap-1 flex-shrink-0 transition">
                     <Image className="w-3 h-3" /> Preview
                   </button>
@@ -490,12 +490,12 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
 
               <div>
                 <div className="flex justify-between items-center mb-2">
-                  <h4 className="font-medium text-gray-700">Daftar Tags</h4>
+                  <h4 className="font-medium text-gray-700">Manage tags</h4>
                   <button onClick={() => setForm(prev => ({
                     ...prev,
                     tags: [...prev.tags, { tag: '', header: '', kitab: '' }]
                   }))} className="text-sm text-indigo-600 hover:text-indigo-700 flex items-center gap-1 transition">
-                    <Plus className="w-3 h-3" /> Tambah Tag
+                    <Plus className="w-3 h-3" /> Insert Tag
                   </button>
                 </div>
                 <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
@@ -508,7 +508,7 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
                           setForm(prev => ({ ...prev, tags: newTags }))
                         }} className="text-red-400 hover:text-red-600 transition"><Trash2 className="w-3 h-3" /></button>
                       </div>
-                      <input placeholder="Teks tag (harus sama persis)" value={tag.tag}
+                      <input placeholder="Variable (case-sensitive / exact match)" value={tag.tag}
                         onChange={e => {
                           const newTags = [...form.tags]
                           newTags[idx].tag = e.target.value
@@ -516,7 +516,7 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
                         }}
                         className="w-full border border-gray-200 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                       />
-                      <input placeholder="Header (judul modal kitab)" value={tag.header}
+                      <input placeholder="Header (book title)" value={tag.header}
                         onChange={e => {
                           const newTags = [...form.tags]
                           newTags[idx].header = e.target.value
@@ -524,7 +524,7 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
                         }}
                         className="w-full border border-gray-200 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                       />
-                      <textarea placeholder="Isi kitab (HTML, aksara Arab)" value={tag.kitab}
+                      <textarea placeholder="Kitab Content (HTML, Arabic Text)" value={tag.kitab}
                         onChange={e => {
                           const newTags = [...form.tags]
                           newTags[idx].kitab = e.target.value
@@ -540,19 +540,19 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
 
               <div>
                 <div className="flex justify-between items-center mb-2">
-                  <h4 className="font-medium text-gray-700">Daftar Preview</h4>
+                  <h4 className="font-medium text-gray-700">Preview Gallery</h4>
                   <button onClick={() => setForm(prev => ({
                     ...prev,
                     previews: [...prev.previews, { name: '', files: [] }]
                   }))} className="text-sm text-indigo-600 hover:text-indigo-700 flex items-center gap-1 transition">
-                    <Plus className="w-3 h-3" /> Tambah Preview
+                    <Plus className="w-3 h-3" /> Insert Preview
                   </button>
                 </div>
                 <div className="space-y-4 max-h-60 overflow-y-auto pr-1">
                   {form.previews.map((preview, pIdx) => (
                     <div key={pIdx} className="border border-gray-200 rounded-lg p-3 space-y-2 bg-gray-50/50">
                       <div className="flex justify-between items-center">
-                        <input placeholder="Nama unik preview" value={preview.name}
+                        <input placeholder="Unique preview name" value={preview.name}
                           onChange={e => {
                             const newPreviews = [...form.previews]
                             newPreviews[pIdx].name = e.target.value
@@ -565,20 +565,20 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
                       <div className="space-y-2">
                         {preview.files.map((file, fIdx) => (
                           <div key={fIdx} className="flex items-center gap-2">
-                            <input placeholder="Nama file (misal: foto.jpg)" value={file.src}
+                            <input placeholder="File name (e.g., photo.jpg)" value={file.src}
                               onChange={e => updatePreviewFile(pIdx, fIdx, 'src', e.target.value)}
                               className="flex-1 border border-gray-200 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                             />
                             <select value={file.type} onChange={e => updatePreviewFile(pIdx, fIdx, 'type', e.target.value)}
                               className="border border-gray-200 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
-                              <option value="image">Gambar</option>
+                              <option value="image">Image</option>
                               <option value="video">Video</option>
                             </select>
                             <button onClick={() => removePreviewFile(pIdx, fIdx)} className="text-red-400 hover:text-red-600 transition"><Trash2 className="w-3 h-3" /></button>
                           </div>
                         ))}
                         <button onClick={() => addFileToPreview(pIdx)} className="text-xs text-indigo-600 hover:text-indigo-700 flex items-center gap-1 transition">
-                          <Plus className="w-3 h-3" /> Tambah File
+                          <Plus className="w-3 h-3" /> Add File
                         </button>
                       </div>
                     </div>
@@ -588,10 +588,10 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
             </div>
             <div className="mt-5 flex gap-3">
               <button onClick={handleSave} className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg text-sm font-medium transition shadow-sm hover:shadow">
-                Simpan
+                Save
               </button>
               <button onClick={onClose} className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2 rounded-lg text-sm font-medium transition">
-                Batal
+                Cancel
               </button>
             </div>
           </div>
@@ -760,7 +760,7 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
               }
               .preview-indicators {
                 display: flex;
-                justify-content: center;
+                justify-center;
                 gap: 6px;
                 margin-top: 10px;
               }
@@ -852,13 +852,13 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
                   onClick={handleModalCancel}
                   className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition"
                 >
-                  Batal
+                  Cancel
                 </button>
                 <button
                   onClick={handleModalConfirm}
                   className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition"
                 >
-                  Simpan
+                  Save
                 </button>
               </div>
             </div>
@@ -891,13 +891,13 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
                   onClick={handleModalCancel}
                   className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition"
                 >
-                  Batal
+                  Cancel
                 </button>
                 <button
                   onClick={handleModalConfirm}
                   className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition"
                 >
-                  Simpan
+                  Save
                 </button>
               </div>
             </div>
