@@ -144,7 +144,7 @@ export default function Sidebar({ data, activeBab, onSelect, onAddBab, onDeleteB
         <div className="flex items-center gap-3 mb-3">
           <img src="/quran.png" alt="Kitabku" className="w-8 h-8" />
           <div>
-            <h1 className="text-lg font-bold text-gray-800 leading-tight">Kitabku</h1>
+            <h1 className="text-lg font-bold text-gray-800 leading-tight">Kitabku Editor</h1>
             <p className="text-[10px] text-gray-400 font-medium tracking-wide">v1.7.4.2</p>
           </div>
         </div>
