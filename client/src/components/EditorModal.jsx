@@ -57,7 +57,7 @@ export default function EditorModal({ mode, babKey, topicIndex, data, onClose, o
       <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center p-5 border-b">
           <h3 className="text-lg font-bold text-gray-800">
-            {mode === 'topic' ? 'Edit Artikel' : mode === 'tags' ? 'Edit Tags' : 'Edit Judul Bab'}
+            {mode === 'topic' ? 'Edit Article' : mode === 'tags' ? 'Manage Tags' : 'Edit Chapter Title'}
           </h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
             <X className="w-5 h-5" />
@@ -76,7 +76,7 @@ export default function EditorModal({ mode, babKey, topicIndex, data, onClose, o
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Judul</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
                 <input
                   value={form.title}
                   onChange={e => setForm({...form, title: e.target.value})}
@@ -84,7 +84,7 @@ export default function EditorModal({ mode, babKey, topicIndex, data, onClose, o
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Konten (HTML)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Content (HTML)</label>
                 <textarea
                   value={form.content}
                   onChange={e => setForm({...form, content: e.target.value})}
@@ -96,7 +96,7 @@ export default function EditorModal({ mode, babKey, topicIndex, data, onClose, o
                 onClick={handleSaveTopic}
                 className="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 transition"
               >
-                Simpan
+                Save
               </button>
             </>
           )}
@@ -104,10 +104,10 @@ export default function EditorModal({ mode, babKey, topicIndex, data, onClose, o
           {mode === 'tags' && (
             <>
               <div className="flex justify-between items-center">
-                <h4 className="font-semibold text-gray-700">Daftar Tags</h4>
+                <h4 className="font-semibold text-gray-700">Manage Tags</h4>
                 <button onClick={addTag} className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800">
                   <Plus className="w-4 h-4" />
-                  Tambah Tag
+                  Add Tag
                 </button>
               </div>
               {form.tags.map((tag, idx) => (
@@ -119,19 +119,19 @@ export default function EditorModal({ mode, babKey, topicIndex, data, onClose, o
                     </button>
                   </div>
                   <input
-                    placeholder="Tag (cth: Lihat Hlm 48 Jld 1)"
+                    placeholder="Tag (e.g., See page 48 Vol 1)"
                     value={tag.tag}
                     onChange={e => updateTag(idx, 'tag', e.target.value)}
                     className="w-full border border-gray-300 px-2 py-1 rounded text-sm"
                   />
                   <input
-                    placeholder="Header sumber kitab"
+                    placeholder="Header (source book title)"
                     value={tag.header}
                     onChange={e => updateTag(idx, 'header', e.target.value)}
                     className="w-full border border-gray-300 px-2 py-1 rounded text-sm"
                   />
                   <textarea
-                    placeholder="Isi kitab (HTML Arab)"
+                    placeholder="Kitab content (HTML, Arabic text)"
                     value={tag.kitab}
                     onChange={e => updateTag(idx, 'kitab', e.target.value)}
                     rows={3}
@@ -143,7 +143,7 @@ export default function EditorModal({ mode, babKey, topicIndex, data, onClose, o
                 onClick={handleSaveTags}
                 className="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 transition"
               >
-                Simpan Tags
+                Save Tags
               </button>
             </>
           )}
