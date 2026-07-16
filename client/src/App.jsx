@@ -40,7 +40,7 @@ function App() {
       if (keys.length > 0 && !activeBab) setActiveBab(keys[0])
     } catch (e) {
       console.error('[Kitabku Editor] Failed to fetch data:', e);
-      setError('Gagal mengambil data')
+      setError('Failed to fetch data')
     } finally {
       setLoading(false)
     }
@@ -57,7 +57,7 @@ function App() {
       setError('')
     } catch (e) {
       console.error('[Kitabku Editor] Set path error:', e);
-      setError(e.response?.data?.error || 'Path tidak valid')
+      setError(e.response?.data?.error || 'Invalid path')
     }
   }
 
@@ -66,25 +66,25 @@ function App() {
       const res = await axios.put('/api/data', newData)
       setData(newData)
       if (res.data.synced) {
-        showToast('Data saved and synced to GitHub', 'success');
+        showToast('Data saved and synced to GitHub', 'success')
       } else {
-        showToast('Data saved locally (GitHub sync failed or skipped)', 'warning');
+        showToast('Data saved locally (GitHub sync failed or skipped)', 'warning')
       }
     } catch (e) {
-      console.error('[Kitabku Editor] Save failed:', e);
-      setError('Gagal menyimpan')
-      showToast('Failed to save data', 'error');
+      console.error('[Kitabku Editor] Save failed:', e)
+      setError('Failed to save')
+      showToast('Failed to save data', 'error')
     }
   }
 
   const addBab = (key, title) => {
-    if (!key || data[key]) return alert('Key sudah ada / kosong')
+    if (!key || data[key]) return alert('Key already exists or empty')
     const newData = { ...data, [key]: { title, topics: [] } }
     saveData(newData)
   }
 
   const deleteBab = (key) => {
-    if (!confirm(`Hapus bab "${key}"?`)) return
+    if (!confirm(`Delete chapter "${key}"?`)) return
     const newData = { ...data }
     delete newData[key]
     saveData(newData)
@@ -240,7 +240,7 @@ function App() {
         <TickerBar />
         <header className="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
           <h2 className="text-xl font-bold text-gray-800">
-            {data && activeBab ? data[activeBab]?.title : 'Pilih Bab'}
+            {data && activeBab ? data[activeBab]?.title : 'Select Chapter'}
           </h2>
           <div className="flex items-center gap-3">
             <div className="relative search-input-wrapper" ref={searchRef}>
@@ -248,7 +248,7 @@ function App() {
                 <input
                   ref={searchInputRef}
                   type="text"
-                  placeholder="Search..."
+                  placeholder="Searching..."
                   value={searchQuery}
                   onChange={(e) => handleSearch(e.target.value)}
                   onFocus={() => {
@@ -275,7 +275,7 @@ function App() {
                       <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                         result.type === 'bab' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
                       }`}>
-                        {result.type === 'bab' ? 'Bab' : 'Artikel'}
+                        {result.type === 'bab' ? 'Chapter' : 'Article'}
                       </span>
                     </div>
                   ))}
@@ -300,7 +300,7 @@ function App() {
         </header>
 
         <main className="flex-1 overflow-y-auto p-6">
-          {loading && <p className="text-gray-500">Memuat...</p>}
+          {loading && <p className="text-gray-500">Loading...</p>}
           {error && <p className="text-red-500">{error}</p>}
 
           {data && activeBab && (
@@ -372,7 +372,7 @@ function App() {
                       <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${
                         result.type === 'bab' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
                       }`}>
-                        {result.type === 'bab' ? 'Bab' : 'Artikel'}
+                        {result.type === 'bab' ? 'Chapter' : 'Article'}
                       </span>
                     </div>
                   ))
@@ -389,7 +389,7 @@ function App() {
               </div>
             )}
             <div className="px-4 py-2 bg-gray-50/80 text-xs text-gray-400 flex justify-between items-center border-t border-gray-100">
-              <span>Press <kbd className="px-1.5 py-0.5 bg-gray-200 rounded text-gray-600 text-[10px] font-mono">Ctrl+K</kbd> to open the search bar.</span>
+              <span>Press <kbd className="px-1.5 py-0.5 bg-gray-200 rounded text-gray-600 text-[10px] font-mono">Ctrl+K</kbd> to open</span>
               <span>Press <kbd className="px-1.5 py-0.5 bg-gray-200 rounded text-gray-600 text-[10px] font-mono">Esc</kbd> to close</span>
             </div>
           </div>
