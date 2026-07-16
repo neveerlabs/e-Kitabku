@@ -86,7 +86,7 @@ export default function PathInput({ onSetPath, error }) {
           type="submit"
           className="w-full mt-4 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
         >
-          Open
+          Commit
         </button>
       </form>
     </div>
