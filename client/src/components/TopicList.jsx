@@ -70,7 +70,7 @@ export default function TopicList({ topics, onAddTopic, onEditTopic, onDeleteTop
           onClick={() => setShowAdd(!showAdd)}
           className="flex items-center gap-1 px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm"
         >
-          <Plus className="w-4 h-4" /> Topik Baru
+          <Plus className="w-4 h-4" /> Artikel Baru
         </button>
       </div>
       {showAdd && (
