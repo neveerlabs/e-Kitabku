@@ -21,6 +21,8 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
   const [onModalConfirm, setOnModalConfirm] = useState(null)
   const previewRef = useRef(null)
   const modalInputRef = useRef(null)
+  const editorTextareaRef = useRef(null)
+  const previewContentRef = useRef(null)
 
   const handleSave = useCallback(() => {
     onSave({ ...topic, ...form })
@@ -345,6 +347,38 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [handleSave])
 
+  useEffect(() => {
+    const editorTextarea = document.getElementById('content-editor')
+    const previewContent = previewContentRef.current
+    if (!editorTextarea || !previewContent) return
+
+    let isSyncing = false
+
+    const syncEditorToPreview = () => {
+      if (isSyncing) return
+      isSyncing = true
+      const ratio = editorTextarea.scrollTop / (editorTextarea.scrollHeight - editorTextarea.clientHeight)
+      previewContent.scrollTop = ratio * (previewContent.scrollHeight - previewContent.clientHeight)
+      setTimeout(() => { isSyncing = false }, 10)
+    }
+
+    const syncPreviewToEditor = () => {
+      if (isSyncing) return
+      isSyncing = true
+      const ratio = previewContent.scrollTop / (previewContent.scrollHeight - previewContent.clientHeight)
+      editorTextarea.scrollTop = ratio * (editorTextarea.scrollHeight - editorTextarea.clientHeight)
+      setTimeout(() => { isSyncing = false }, 10)
+    }
+
+    editorTextarea.addEventListener('scroll', syncEditorToPreview)
+    previewContent.addEventListener('scroll', syncPreviewToEditor)
+
+    return () => {
+      editorTextarea.removeEventListener('scroll', syncEditorToPreview)
+      previewContent.removeEventListener('scroll', syncPreviewToEditor)
+    }
+  }, [form.content])
+
   const addFileToPreview = (previewIndex) => {
     const newPreviews = [...form.previews]
     newPreviews[previewIndex].files.push({ src: '', type: 'image' })
@@ -369,107 +403,110 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
-        <div className="flex justify-between items-center p-4 border-b">
-          <h3 className="text-lg font-bold">Edit Artikel: {topic.title}</h3>
-          <button onClick={onClose}><X className="w-5 h-5" /></button>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+        <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100">
+          <h3 className="text-lg font-bold text-gray-800">Edit Artikel: <span className="font-normal text-gray-600">{topic.title}</span></h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition p-1 rounded-lg hover:bg-gray-100">
+            <X className="w-5 h-5" />
+          </button>
         </div>
         <div className="flex-1 overflow-hidden flex flex-col lg:flex-row">
-          <div className="flex-1 p-4 overflow-y-auto">
+          <div className="flex-1 p-5 overflow-y-auto">
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium">ID</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">ID</label>
                 <input value={form.id} onChange={e => setForm({...form, id: e.target.value})}
-                  className="w-full border px-3 py-2 rounded" />
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
               </div>
               <div>
-                <label className="block text-sm font-medium">Judul</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Judul</label>
                 <input value={form.title} onChange={e => setForm({...form, title: e.target.value})}
-                  className="w-full border px-3 py-2 rounded" />
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Konten (HTML + Markup Khusus)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Konten (HTML + Markup Khusus)</label>
                 <div className="flex gap-1 mb-2 overflow-x-auto whitespace-nowrap py-1">
                   <button onClick={() => insertText('((', '))')} title="Sisipkan kitab tag"
-                    className="px-2 py-1 bg-yellow-100 border rounded text-xs flex items-center gap-1 flex-shrink-0">
+                    className="px-2 py-1 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded text-xs flex items-center gap-1 flex-shrink-0 transition">
                     <Tag className="w-3 h-3" /> Kitab
                   </button>
                   <button onClick={() => insertText('**', '**')} title="Highlight text (Select Text)"
-                    className="px-2 py-1 bg-yellow-100 border rounded text-xs flex items-center gap-1 flex-shrink-0">
+                    className="px-2 py-1 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded text-xs flex items-center gap-1 flex-shrink-0 transition">
                     <Highlighter className="w-3 h-3" /> Select
                   </button>
                   <button onClick={() => insertText('<b>', '</b>')} title="HTML bold"
-                    className="px-2 py-1 bg-yellow-100 border rounded text-xs flex items-center gap-1 flex-shrink-0">
+                    className="px-2 py-1 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded text-xs flex items-center gap-1 flex-shrink-0 transition">
                     <Bold className="w-3 h-3" /> Bold
                   </button>
                   <button onClick={() => insertText('<i>', '</i>')} title="HTML italic (miring)"
-                    className="px-2 py-1 bg-yellow-100 border rounded text-xs flex items-center gap-1 flex-shrink-0">
+                    className="px-2 py-1 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded text-xs flex items-center gap-1 flex-shrink-0 transition">
                     <Italic className="w-3 h-3" /> Italic
                   </button>
                   <button onClick={() => insertText('&emsp;', '')} title="Sisipkan spasi paragraf (indentasi)"
-                    className="px-2 py-1 bg-yellow-100 border rounded text-xs flex items-center gap-1 flex-shrink-0">
+                    className="px-2 py-1 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded text-xs flex items-center gap-1 flex-shrink-0 transition">
                     <AlignJustify className="w-3 h-3" /> Paragraf
                   </button>
                   <button onClick={() => insertText('!!', '!!')} title="Dictionary"
-                    className="px-2 py-1 bg-yellow-100 border rounded text-xs flex items-center gap-1 flex-shrink-0">
+                    className="px-2 py-1 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded text-xs flex items-center gap-1 flex-shrink-0 transition">
                     <AlertTriangle className="w-3 h-3" /> Note
                   </button>
                   <button onClick={insertList} title="Masukkan daftar"
-                    className="px-2 py-1 bg-yellow-100 border rounded text-xs flex items-center gap-1 flex-shrink-0">
+                    className="px-2 py-1 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded text-xs flex items-center gap-1 flex-shrink-0 transition">
                     <List className="w-3 h-3" /> List
                   </button>
                   <button onClick={insertRedirectButton} title="Sisipkan tombol redirect"
-                    className="px-2 py-1 bg-green-100 border rounded text-xs flex items-center gap-1 flex-shrink-0">
+                    className="px-2 py-1 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded text-xs flex items-center gap-1 flex-shrink-0 transition">
                     <ExternalLink className="w-3 h-3" /> Redirect
                   </button>
                   <button onClick={insertDefineBlock} title="Sisipkan blok definisi redirect"
-                    className="px-2 py-1 bg-green-100 border rounded text-xs flex items-center gap-1 flex-shrink-0">
+                    className="px-2 py-1 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded text-xs flex items-center gap-1 flex-shrink-0 transition">
                     <Code className="w-3 h-3" /> Define
                   </button>
                   <button onClick={insertQuizBlock} title="Sisipkan Quiz"
-                    className="px-2 py-1 bg-purple-100 border rounded text-xs flex items-center gap-1 flex-shrink-0">
+                    className="px-2 py-1 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded text-xs flex items-center gap-1 flex-shrink-0 transition">
                     <HelpCircle className="w-3 h-3" /> Quiz
                   </button>
                   <button onClick={insertPreviewTag} title="Sisipkan preview gambar/video"
-                    className="px-2 py-1 bg-pink-100 border rounded text-xs flex items-center gap-1 flex-shrink-0">
+                    className="px-2 py-1 bg-pink-50 hover:bg-pink-100 border border-pink-200 rounded text-xs flex items-center gap-1 flex-shrink-0 transition">
                     <Image className="w-3 h-3" /> Preview
                   </button>
-                  <button onClick={syncTags} className="px-2 py-1 bg-blue-100 border rounded text-xs flex-shrink-0 ml-auto">
+                  <button onClick={syncTags} className="px-2 py-1 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded text-xs flex-shrink-0 ml-auto transition">
                     Sync Tags
                   </button>
-                  <button onClick={syncPreviews} className="px-2 py-1 bg-blue-100 border rounded text-xs flex-shrink-0">
+                  <button onClick={syncPreviews} className="px-2 py-1 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded text-xs flex-shrink-0 transition">
                     Sync Preview
                   </button>
                 </div>
                 <textarea
                   id="content-editor"
+                  ref={editorTextareaRef}
                   value={form.content}
                   onChange={e => setForm({...form, content: e.target.value})}
                   rows={15}
-                  className="w-full border px-3 py-2 rounded font-mono text-sm"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                 />
               </div>
 
               <div>
                 <div className="flex justify-between items-center mb-2">
-                  <h4 className="font-medium">Daftar Tags</h4>
+                  <h4 className="font-medium text-gray-700">Daftar Tags</h4>
                   <button onClick={() => setForm(prev => ({
                     ...prev,
                     tags: [...prev.tags, { tag: '', header: '', kitab: '' }]
-                  }))} className="text-sm text-blue-600 flex items-center gap-1">
+                  }))} className="text-sm text-indigo-600 hover:text-indigo-700 flex items-center gap-1 transition">
                     <Plus className="w-3 h-3" /> Tambah Tag
                   </button>
                 </div>
-                <div className="space-y-3 max-h-60 overflow-y-auto">
+                <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
                   {form.tags.map((tag, idx) => (
-                    <div key={idx} className="border p-3 rounded space-y-2 bg-gray-50">
+                    <div key={idx} className="border border-gray-200 rounded-lg p-3 space-y-2 bg-gray-50/50">
                       <div className="flex justify-between">
-                        <span className="text-xs font-semibold">Tag #{idx+1}</span>
+                        <span className="text-xs font-semibold text-gray-500">Tag #{idx+1}</span>
                         <button onClick={() => {
                           const newTags = form.tags.filter((_, i) => i !== idx)
                           setForm(prev => ({ ...prev, tags: newTags }))
-                        }} className="text-red-500"><Trash2 className="w-3 h-3" /></button>
+                        }} className="text-red-400 hover:text-red-600 transition"><Trash2 className="w-3 h-3" /></button>
                       </div>
                       <input placeholder="Teks tag (harus sama persis)" value={tag.tag}
                         onChange={e => {
@@ -477,7 +514,7 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
                           newTags[idx].tag = e.target.value
                           setForm(prev => ({ ...prev, tags: newTags }))
                         }}
-                        className="w-full border px-2 py-1 rounded text-sm"
+                        className="w-full border border-gray-200 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                       />
                       <input placeholder="Header (judul modal kitab)" value={tag.header}
                         onChange={e => {
@@ -485,7 +522,7 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
                           newTags[idx].header = e.target.value
                           setForm(prev => ({ ...prev, tags: newTags }))
                         }}
-                        className="w-full border px-2 py-1 rounded text-sm"
+                        className="w-full border border-gray-200 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                       />
                       <textarea placeholder="Isi kitab (HTML, aksara Arab)" value={tag.kitab}
                         onChange={e => {
@@ -494,7 +531,7 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
                           setForm(prev => ({ ...prev, tags: newTags }))
                         }}
                         rows={6}
-                        className="w-full border px-2 py-1 rounded text-sm font-mono min-h-[120px]"
+                        className="w-full border border-gray-200 rounded px-2 py-1 text-sm font-mono min-h-[120px] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                       />
                     </div>
                   ))}
@@ -503,17 +540,17 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
 
               <div>
                 <div className="flex justify-between items-center mb-2">
-                  <h4 className="font-medium">Daftar Preview</h4>
+                  <h4 className="font-medium text-gray-700">Daftar Preview</h4>
                   <button onClick={() => setForm(prev => ({
                     ...prev,
                     previews: [...prev.previews, { name: '', files: [] }]
-                  }))} className="text-sm text-blue-600 flex items-center gap-1">
+                  }))} className="text-sm text-indigo-600 hover:text-indigo-700 flex items-center gap-1 transition">
                     <Plus className="w-3 h-3" /> Tambah Preview
                   </button>
                 </div>
-                <div className="space-y-4 max-h-60 overflow-y-auto">
+                <div className="space-y-4 max-h-60 overflow-y-auto pr-1">
                   {form.previews.map((preview, pIdx) => (
-                    <div key={pIdx} className="border p-3 rounded space-y-2 bg-gray-50">
+                    <div key={pIdx} className="border border-gray-200 rounded-lg p-3 space-y-2 bg-gray-50/50">
                       <div className="flex justify-between items-center">
                         <input placeholder="Nama unik preview" value={preview.name}
                           onChange={e => {
@@ -521,26 +558,26 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
                             newPreviews[pIdx].name = e.target.value
                             setForm(prev => ({ ...prev, previews: newPreviews }))
                           }}
-                          className="w-2/3 border px-2 py-1 rounded text-sm"
+                          className="w-2/3 border border-gray-200 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                         />
-                        <button onClick={() => removePreview(pIdx)} className="text-red-500"><Trash2 className="w-4 h-4" /></button>
+                        <button onClick={() => removePreview(pIdx)} className="text-red-400 hover:text-red-600 transition"><Trash2 className="w-4 h-4" /></button>
                       </div>
                       <div className="space-y-2">
                         {preview.files.map((file, fIdx) => (
                           <div key={fIdx} className="flex items-center gap-2">
                             <input placeholder="Nama file (misal: foto.jpg)" value={file.src}
                               onChange={e => updatePreviewFile(pIdx, fIdx, 'src', e.target.value)}
-                              className="flex-1 border px-2 py-1 rounded text-sm"
+                              className="flex-1 border border-gray-200 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                             />
                             <select value={file.type} onChange={e => updatePreviewFile(pIdx, fIdx, 'type', e.target.value)}
-                              className="border px-2 py-1 rounded text-sm">
+                              className="border border-gray-200 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
                               <option value="image">Gambar</option>
                               <option value="video">Video</option>
                             </select>
-                            <button onClick={() => removePreviewFile(pIdx, fIdx)} className="text-red-500"><Trash2 className="w-3 h-3" /></button>
+                            <button onClick={() => removePreviewFile(pIdx, fIdx)} className="text-red-400 hover:text-red-600 transition"><Trash2 className="w-3 h-3" /></button>
                           </div>
                         ))}
-                        <button onClick={() => addFileToPreview(pIdx)} className="text-xs text-blue-600 flex items-center gap-1">
+                        <button onClick={() => addFileToPreview(pIdx)} className="text-xs text-indigo-600 hover:text-indigo-700 flex items-center gap-1 transition">
                           <Plus className="w-3 h-3" /> Tambah File
                         </button>
                       </div>
@@ -549,21 +586,31 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
                 </div>
               </div>
             </div>
-            <div className="mt-4 flex gap-2">
-              <button onClick={handleSave} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            <div className="mt-5 flex gap-3">
+              <button onClick={handleSave} className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg text-sm font-medium transition shadow-sm hover:shadow">
                 Simpan
               </button>
-              <button onClick={onClose} className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300">
+              <button onClick={onClose} className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2 rounded-lg text-sm font-medium transition">
                 Batal
               </button>
             </div>
           </div>
 
-          <div className="w-full lg:w-1/2 border-l p-4 overflow-y-auto bg-gray-50" ref={previewRef}>
-            <h4 className="font-medium flex items-center gap-1 mb-2"><Eye className="w-4 h-4" /><i> Mobile preview</i></h4>
-            <div className="bg-white border rounded p-4 shadow-inner max-w-full"
-              dangerouslySetInnerHTML={{ __html: renderPreview() }}
-            />
+          <div className="w-full lg:w-1/2 border-l border-gray-100 bg-gray-50/80 relative overflow-hidden" ref={previewRef}>
+            <div className="absolute top-3 right-3 z-10">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white/80 backdrop-blur-md rounded-full shadow-md border border-white/30 text-xs font-medium text-gray-600">
+                <Eye className="w-3.5 h-3.5 text-gray-400" />
+                <span>Mobile preview</span>
+              </div>
+            </div>
+            <div
+              ref={previewContentRef}
+              className="h-full overflow-y-auto px-5 py-4 pb-6 scroll-smooth custom-scrollbar"
+            >
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100/80 p-5 max-w-full">
+                <div dangerouslySetInnerHTML={{ __html: renderPreview() }} />
+              </div>
+            </div>
             <style>{`
               .artikel-isi {
                 font-size: 1rem;
@@ -781,11 +828,11 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
       </div>
 
       {showPreviewModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[70] p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-            <div className="flex justify-between items-center p-4 border-b">
-              <h3 className="text-lg font-semibold">{modalTitle}</h3>
-              <button onClick={handleModalCancel} className="text-gray-400 hover:text-gray-600">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[70] p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+            <div className="flex justify-between items-center p-4 border-b border-gray-100">
+              <h3 className="text-lg font-semibold text-gray-800">{modalTitle}</h3>
+              <button onClick={handleModalCancel} className="text-gray-400 hover:text-gray-600 transition">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -797,19 +844,19 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
                 onChange={(e) => setModalInput(e.target.value)}
                 onKeyDown={handleModalKeyDown}
                 placeholder={modalPlaceholder}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                 autoFocus
               />
               <div className="flex justify-end gap-2 mt-4">
                 <button
                   onClick={handleModalCancel}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition text-sm"
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition"
                 >
                   Batal
                 </button>
                 <button
                   onClick={handleModalConfirm}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm"
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition"
                 >
                   Simpan
                 </button>
@@ -820,11 +867,11 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
       )}
 
       {showRedirectModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[70] p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-            <div className="flex justify-between items-center p-4 border-b">
-              <h3 className="text-lg font-semibold">{modalTitle}</h3>
-              <button onClick={handleModalCancel} className="text-gray-400 hover:text-gray-600">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[70] p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+            <div className="flex justify-between items-center p-4 border-b border-gray-100">
+              <h3 className="text-lg font-semibold text-gray-800">{modalTitle}</h3>
+              <button onClick={handleModalCancel} className="text-gray-400 hover:text-gray-600 transition">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -836,19 +883,19 @@ export default function TopicEditor({ babKey, topicIndex, topic, onSave, onClose
                 onChange={(e) => setModalInput(e.target.value)}
                 onKeyDown={handleModalKeyDown}
                 placeholder={modalPlaceholder}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
                 autoFocus
               />
               <div className="flex justify-end gap-2 mt-4">
                 <button
                   onClick={handleModalCancel}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition text-sm"
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition"
                 >
                   Batal
                 </button>
                 <button
                   onClick={handleModalConfirm}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm"
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition"
                 >
                   Simpan
                 </button>
