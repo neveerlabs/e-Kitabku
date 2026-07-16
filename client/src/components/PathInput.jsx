@@ -61,7 +61,7 @@ export default function PathInput({ onSetPath, error }) {
           <FolderOpen className="w-8 h-8 text-blue-500" />
           <h1 className="text-2xl font-bold text-gray-800">Kitabku Editor</h1>
         </div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Path file data.json</label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Masukkan path file data.json</label>
         <div className="flex gap-2">
           <input
             type="text"
@@ -94,7 +94,7 @@ export default function PathInput({ onSetPath, error }) {
           type="submit"
           className="w-full mt-4 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
         >
-          Buka File
+          Commit
         </button>
       </form>
     </div>
