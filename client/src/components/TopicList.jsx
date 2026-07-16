@@ -2,14 +2,14 @@ import { useState, useRef } from 'react'
 import { Plus, Edit3, Trash2, GripVertical, X } from 'lucide-react'
 
 export default function TopicList({ topics, onAddTopic, onEditTopic, onDeleteTopic, onReorderTopic }) {
-  const [showAdd, setShowAdd] = useState(false)
+  const [showAddModal, setShowAddModal] = useState(false)
   const [newTopic, setNewTopic] = useState({ id: '', title: '', content: '', tags: [] })
   const [deleteTarget, setDeleteTarget] = useState(null)
   const dragItem = useRef(null)
   const dragOverItem = useRef(null)
 
   const handleAdd = () => {
-    if (!newTopic.id || !newTopic.title) return alert('ID dan judul wajib')
+    if (!newTopic.id || !newTopic.title) return alert('ID and title are required')
     onAddTopic({
       id: newTopic.id,
       title: newTopic.title,
@@ -17,7 +17,7 @@ export default function TopicList({ topics, onAddTopic, onEditTopic, onDeleteTop
       tags: []
     })
     setNewTopic({ id: '', title: '', content: '', tags: [] })
-    setShowAdd(false)
+    setShowAddModal(false)
   }
 
   const handleDeleteClick = (idx) => {
@@ -64,22 +64,16 @@ export default function TopicList({ topics, onAddTopic, onEditTopic, onDeleteTop
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold">Daftar Artikel</h3>
+      <div className="flex justify-between items-center mb-5">
+        <h3 className="text-lg font-semibold text-gray-700">Articles</h3>
         <button
-          onClick={() => setShowAdd(!showAdd)}
-          className="flex items-center gap-1 px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm"
+          onClick={() => setShowAddModal(true)}
+          className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-medium transition shadow-sm hover:shadow border-0 outline-none"
         >
-          <Plus className="w-4 h-4" /> Artikel Baru
+          New article
         </button>
       </div>
-      {showAdd && (
-        <div className="bg-white border p-4 rounded mb-4 grid grid-cols-2 gap-2">
-          <input placeholder="ID" value={newTopic.id} onChange={e => setNewTopic({...newTopic, id: e.target.value})} className="border px-2 py-1 rounded text-sm" />
-          <input placeholder="Judul" value={newTopic.title} onChange={e => setNewTopic({...newTopic, title: e.target.value})} className="border px-2 py-1 rounded text-sm" />
-          <button onClick={handleAdd} className="col-span-2 bg-blue-500 text-white py-1 rounded text-sm">Tambah</button>
-        </div>
-      )}
+
       <div className="space-y-2">
         {topics.map((topic, idx) => (
           <div
@@ -89,22 +83,28 @@ export default function TopicList({ topics, onAddTopic, onEditTopic, onDeleteTop
             onDragOver={(e) => handleDragOver(e, idx)}
             onDrop={handleDrop}
             onDragEnd={handleDragEnd}
-            className="flex items-center justify-between bg-white border p-3 rounded cursor-default"
+            className="flex items-center justify-between bg-white/70 backdrop-blur-sm border border-gray-200/60 rounded-xl p-3 shadow-sm hover:shadow-md transition-all duration-200 group"
           >
-            <div className="flex items-center gap-2">
-              <span className="cursor-grab text-gray-400 hover:text-gray-600">
+            <div className="flex items-center gap-3">
+              <span className="cursor-grab text-gray-300 hover:text-gray-500 transition">
                 <GripVertical className="w-4 h-4" />
               </span>
               <div>
-                <span className="font-medium">{topic.title}</span>
-                <code className="ml-2 text-xs bg-gray-100 px-1 rounded">{topic.id}</code>
+                <span className="font-medium text-gray-700">{topic.title}</span>
+                <code className="ml-2 text-xs bg-gray-100/70 px-2 py-0.5 rounded-full text-gray-500">{topic.id}</code>
               </div>
             </div>
-            <div className="flex gap-2">
-              <button onClick={() => onEditTopic(idx)} className="text-gray-400 hover:text-blue-500">
+            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition">
+              <button
+                onClick={() => onEditTopic(idx)}
+                className="text-gray-400 hover:text-indigo-500 transition p-1"
+              >
                 <Edit3 className="w-4 h-4" />
               </button>
-              <button onClick={() => handleDeleteClick(idx)} className="text-gray-400 hover:text-red-500">
+              <button
+                onClick={() => handleDeleteClick(idx)}
+                className="text-gray-400 hover:text-red-500 transition p-1"
+              >
                 <Trash2 className="w-4 h-4" />
               </button>
             </div>
@@ -112,33 +112,79 @@ export default function TopicList({ topics, onAddTopic, onEditTopic, onDeleteTop
         ))}
       </div>
 
-      {/* Modal Konfirmasi Hapus Artikel */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-[70] p-4" onClick={() => setShowAddModal(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full border border-white/30" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center p-4 border-b border-gray-100">
+              <h3 className="text-lg font-semibold text-gray-800">Add a new article</h3>
+              <button onClick={() => setShowAddModal(false)} className="text-gray-400 hover:text-gray-600 transition">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">ID</label>
+                <input
+                  placeholder="e.g., pembatalan-sholat"
+                  value={newTopic.id}
+                  onChange={(e) => setNewTopic({...newTopic, id: e.target.value})}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition outline-none"
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                <input
+                  placeholder="e.g., Pembatalan Sholat"
+                  value={newTopic.title}
+                  onChange={(e) => setNewTopic({...newTopic, title: e.target.value})}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition outline-none"
+                />
+              </div>
+              <div className="flex justify-end gap-2 mt-2">
+                <button
+                  onClick={() => setShowAddModal(false)}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAdd}
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition shadow-sm hover:shadow"
+                >
+                  Add
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {deleteTarget !== null && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[70] p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-            <div className="flex justify-between items-center p-4 border-b">
-              <h3 className="text-lg font-semibold text-red-600">Konfirmasi Hapus</h3>
-              <button onClick={handleDeleteCancel} className="text-gray-400 hover:text-gray-600">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-[70] p-4" onClick={handleDeleteCancel}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full border border-white/30" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center p-4 border-b border-gray-100">
+              <h3 className="text-lg font-semibold text-red-600">Confirm Deletion</h3>
+              <button onClick={handleDeleteCancel} className="text-gray-400 hover:text-gray-600 transition">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <div className="p-5">
               <p className="text-gray-700">
-                Apakah Anda yakin ingin menghapus artikel <strong>"{topics[deleteTarget]?.title}"</strong>?
+                Are you sure you want to delete this article? Once deleted, this data cannot be restored.
               </p>
-              <p className="text-sm text-gray-500 mt-1">Data yang dihapus tidak dapat dikembalikan.</p>
               <div className="flex justify-end gap-2 mt-4">
                 <button
                   onClick={handleDeleteCancel}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition text-sm"
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleDeleteConfirm}
-                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition text-sm"
+                  className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition shadow-sm hover:shadow"
                 >
-                  Delete
+                  Yes, delete
                 </button>
               </div>
             </div>
