@@ -17,7 +17,7 @@ export default function TickerBar() {
         setDateLabel(res.data.date || '')
       } catch (err) {
         console.error('[Ticker] Failed to fetch:', err)
-        setEvents(['Data sejarah tidak tersedia'])
+        setEvents(['Historical data not available'])
       } finally {
         setLoading(false)
       }
@@ -60,7 +60,6 @@ export default function TickerBar() {
   if (loading) return <div className="h-8 bg-[#5452f6]"></div>
   if (events.length === 0) return null
 
-  // Gabungkan event tanpa menambahkan dateLabel di depan
   const fullText = events.join(' | ')
 
   return (
