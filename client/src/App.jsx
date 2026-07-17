@@ -25,13 +25,26 @@ function App() {
   const floatingSearchRef = useRef(null)
   const floatingInputRef = useRef(null)
 
-  const [backgroundImage, setBackgroundImage] = useState(() => localStorage.getItem('kitabku-bg') || '')
+  // Persist background image and its brightness classification
+  const [backgroundImage, setBackgroundImage] = useState(() => {
+    return localStorage.getItem('kitabku-bg') || ''
+  })
+  const [isBgDark, setIsBgDark] = useState(() => {
+    const stored = localStorage.getItem('kitabku-bg-dark')
+    return stored ? stored === 'true' : false
+  })
+
   const [showBgPicker, setShowBgPicker] = useState(false)
   const [bgFiles, setBgFiles] = useState([])
-  const [isBgDark, setIsBgDark] = useState(false)
 
+  // Save both values to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem('kitabku-bg', backgroundImage)
+    localStorage.setItem('kitabku-bg-dark', String(isBgDark))
+  }, [backgroundImage, isBgDark])
+
+  // Analyze background image brightness when it changes
+  useEffect(() => {
     if (!backgroundImage) {
       setIsBgDark(false)
       return
