@@ -45,6 +45,23 @@ function log(message, type = 'INFO') {
 const KITABKU_ROOT = '/home/neverlabs/Documents/e-Kitabku';
 app.use('/img/preview', express.static(path.join(KITABKU_ROOT, 'img', 'preview')));
 
+const BACKGROUND_DIR = path.join(KITABKU_ROOT, 'Editor', 'client', 'background');
+app.use('/background', express.static(BACKGROUND_DIR));
+
+app.get('/api/backgrounds', (req, res) => {
+  try {
+    const files = fs.readdirSync(BACKGROUND_DIR);
+    const imageFiles = files.filter(file => {
+      const ext = path.extname(file).toLowerCase();
+      return ['.png', '.jpg', '.jpeg'].includes(ext);
+    });
+    res.json(imageFiles);
+  } catch (e) {
+    log(`Failed to list backgrounds: ${e.message}`, 'ERROR');
+    res.status(500).json({ error: 'Failed to list background images' });
+  }
+});
+
 async function syncToGithub(data) {
   if (!GITHUB_TOKEN || !GITHUB_OWNER || !GITHUB_REPO) {
     log('GitHub configuration missing, skipping sync', 'WARNING');
