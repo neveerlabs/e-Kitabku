@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import axios from 'axios'
-import { Search, File, X } from 'lucide-react'
+import { Search, File, X, Pencil, Trash2 } from 'lucide-react'
 import Sidebar from './components/Sidebar'
 import TopicList from './components/TopicList'
 import TopicEditor from './components/TopicEditor'
@@ -24,6 +24,63 @@ function App() {
   const searchInputRef = useRef(null)
   const floatingSearchRef = useRef(null)
   const floatingInputRef = useRef(null)
+
+  const [backgroundImage, setBackgroundImage] = useState(() => localStorage.getItem('kitabku-bg') || '')
+  const [showBgPicker, setShowBgPicker] = useState(false)
+  const [bgFiles, setBgFiles] = useState([])
+  const [isBgDark, setIsBgDark] = useState(false)
+
+  useEffect(() => {
+    localStorage.setItem('kitabku-bg', backgroundImage)
+    if (!backgroundImage) {
+      setIsBgDark(false)
+      return
+    }
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+    img.src = backgroundImage
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = img.width
+      canvas.height = img.height
+      const ctx = canvas.getContext('2d')
+      ctx.drawImage(img, 0, 0)
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+      const data = imageData.data
+      let r = 0, g = 0, b = 0
+      for (let i = 0; i < data.length; i += 4) {
+        r += data[i]
+        g += data[i + 1]
+        b += data[i + 2]
+      }
+      const count = data.length / 4
+      r /= count
+      g /= count
+      b /= count
+      const luminance = 0.299 * r + 0.587 * g + 0.114 * b
+      setIsBgDark(luminance < 128)
+    }
+    img.onerror = () => setIsBgDark(false)
+  }, [backgroundImage])
+
+  const fetchBgFiles = useCallback(async () => {
+    try {
+      const res = await axios.get('/api/backgrounds')
+      setBgFiles(res.data)
+    } catch (e) {
+      console.error('Failed to load background images:', e)
+    }
+  }, [])
+
+  const handleSelectBg = (file) => {
+    setBackgroundImage(`/background/${file}`)
+    setShowBgPicker(false)
+  }
+
+  const handleRemoveBg = () => {
+    setBackgroundImage('')
+    setShowBgPicker(false)
+  }
 
   const showToast = useCallback((message, type = 'info') => {
     setToast({ message, type });
@@ -220,6 +277,12 @@ function App() {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [editingTopic, showFloatingSearch])
 
+  useEffect(() => {
+    if (showBgPicker) {
+      fetchBgFiles()
+    }
+  }, [showBgPicker, fetchBgFiles])
+
   if (!path) {
     return <PathInput onSetPath={handleSetPath} error={error} />
   }
@@ -299,7 +362,15 @@ function App() {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-6">
+        <main
+          className="flex-1 overflow-y-auto p-6 relative"
+          style={{
+            backgroundImage: backgroundImage ? `url(${backgroundImage})` : 'none',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            imageRendering: 'auto'
+          }}
+        >
           {loading && <p className="text-gray-500">Loading...</p>}
           {error && <p className="text-red-500">{error}</p>}
 
@@ -310,8 +381,17 @@ function App() {
               onEditTopic={(index) => setEditingTopic({ babKey: activeBab, topicIndex: index })}
               onDeleteTopic={(index) => deleteTopic(activeBab, index)}
               onReorderTopic={(oldIndex, newIndex) => reorderTopic(activeBab, oldIndex, newIndex)}
+              isBgDark={isBgDark}
             />
           )}
+
+          <button
+            onClick={() => setShowBgPicker(true)}
+            className="fixed bottom-6 right-6 p-3 bg-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 z-40 opacity-0 hover:opacity-100"
+            title="Change background"
+          >
+            <Pencil className="w-5 h-5 text-gray-600" />
+          </button>
         </main>
       </div>
 
@@ -391,6 +471,51 @@ function App() {
             <div className="px-4 py-2 bg-gray-50/80 text-xs text-gray-400 flex justify-between items-center border-t border-gray-100">
               <span>Press <kbd className="px-1.5 py-0.5 bg-gray-200 rounded text-gray-600 text-[10px] font-mono">Ctrl+K</kbd> to open</span>
               <span>Press <kbd className="px-1.5 py-0.5 bg-gray-200 rounded text-gray-600 text-[10px] font-mono">Esc</kbd> to close</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showBgPicker && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[70] p-4" onClick={() => setShowBgPicker(false)}>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center p-4 border-b border-gray-100">
+              <h3 className="text-lg font-semibold text-gray-800">Choose Background</h3>
+              <button onClick={() => setShowBgPicker(false)} className="text-gray-400 hover:text-gray-600 transition">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+              <div className="grid grid-cols-3 gap-3">
+                {bgFiles.map((file) => (
+                  <div
+                    key={file}
+                    className="relative aspect-square rounded-lg overflow-hidden border-2 border-transparent hover:border-indigo-500 cursor-pointer transition"
+                    onClick={() => handleSelectBg(file)}
+                  >
+                    <img
+                      src={`/background/${file}`}
+                      alt={file}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition" />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="p-4 border-t border-gray-100 flex justify-between">
+              <button
+                onClick={handleRemoveBg}
+                className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition"
+              >
+                <Trash2 className="w-4 h-4" /> Remove Background
+              </button>
+              <button
+                onClick={() => setShowBgPicker(false)}
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>
